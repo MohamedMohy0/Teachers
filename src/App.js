@@ -96,7 +96,7 @@ function QuestionPage() {
   const [grade, setGrade] = useState("الأول الثانوي");
   const [lecture, setLecture] = useState("");
   const [question, setQuestion] = useState("");
-  const [pdfUrl, setPdfUrl] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
 
@@ -119,22 +119,21 @@ function QuestionPage() {
     }
 
     setLoading(true);
-    setPdfUrl(null);
+    setImageUrl(null);
 
     try {
       const res = await axios.get("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_page", {
-        params: {
-          email,
-          grade,
-          lecture_number: lecture,
-          question_number: question,
-        },
-        responseType: "blob",
-      });
+  params: {
+    email,
+    grade,
+    lecture_number: lecture,    // ✅ استخدم قيمة المحاضرة
+    question_number: question
+  },
+  responseType: "blob"
+});
+const imageUrl = URL.createObjectURL(res.data);
+setImageUrl(imageUrl);
 
-      const file = new Blob([res.data], { type: "application/pdf" });
-      const fileURL = URL.createObjectURL(file);
-      setPdfUrl(fileURL);
     } catch (error) {
       if (error.response?.status === 403) {
         toast.warn(error.response.data.detail || "غير مسموح بعرض الحل الأن");
@@ -197,18 +196,12 @@ function QuestionPage() {
             </div>
           </form>
 
-          {pdfUrl && (
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4 text-center text-[#1e293b]">حل السؤال:</h2>
-              <iframe
-            src={`https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
-            width="100%"
-            height="600px"
-            frameBorder="0"
-            title="PDF Viewer"
-          />
+{imageUrl && (
+  <div className="mt-8 text-center">
+    <h2 className="text-xl font-semibold mb-4 text-[#1e293b]">حل السؤال:</h2>
+    <img src={imageUrl} alt="حل السؤال" className="mx-auto max-w-full shadow-lg border" />
+  </div>
 
-            </div>
           )}
         </div>
       </div>
