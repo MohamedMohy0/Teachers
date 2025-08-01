@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -216,12 +216,13 @@ function QuestionPage() {
 // التطبيق الرئيسي
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/app" element={<QuestionPage />} />
-      </Routes>
-    </BrowserRouter>
+<HashRouter>
+  <Routes>
+    <Route path="/" element={<LoginPage />} />
+    <Route path="/app" element={<QuestionPage />} />
+  </Routes>
+</HashRouter>
+
   );
 }
 
