@@ -201,10 +201,13 @@ function QuestionPage() {
             <div className="mt-8">
               <h2 className="text-xl font-semibold mb-4 text-center text-[#1e293b]">حل السؤال:</h2>
               <iframe
-                src={pdfUrl}
-                className="w-full h-[600px] border rounded-xl"
-                title="PDF Viewer"
-              ></iframe>
+            src={`https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
+            width="100%"
+            height="600px"
+            frameBorder="0"
+            title="PDF Viewer"
+          />
+
             </div>
           )}
         </div>
