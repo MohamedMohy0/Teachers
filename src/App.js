@@ -122,15 +122,12 @@ function QuestionPage() {
     setImageUrl(null);
 
     try {
-      const res = await axios.get("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_page", {
-  params: {
-    email,
-    grade,
-    lecture_number: lecture,    // ✅ استخدم قيمة المحاضرة
-    question_number: question
-  },
+const encodedEmail = encodeURIComponent(email);
+const encodedGrade = encodeURIComponent(grade);
+const res = await axios.get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_page?email=${encodedEmail}&grade=${encodedGrade}&lecture_number=${lecture}&question_number=${question}`, {
   responseType: "blob"
 });
+
 const imageUrl = URL.createObjectURL(res.data);
 setImageUrl(imageUrl);
 
