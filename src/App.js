@@ -6,18 +6,25 @@ import QuizPage from "./QuizPage";
 import CompleteProfile from "./CompleteProfile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from "react";
 
 function App() {
-  const isLoggedIn = !!localStorage.getItem("email"); // تحقق من وجود تسجيل دخول
+  const [isLoggedIn, setIsLoggedIn] = useState(null); // null تعني لم نتحقق بعد
+
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    setIsLoggedIn(!!email);
+  }, []);
+
+  if (isLoggedIn === null) {
+    return null; // أو Spinner لو أردت
+  }
 
   return (
     <HashRouter>
       <ToastContainer position="top-center" />
       <Routes>
-        {/* الصفحة الرئيسية: نوجه المستخدم حسب حالته */}
         <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Home />} />
-
-        {/* باقي الصفحات تتطلب تسجيل دخول */}
         <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="/app" element={isLoggedIn ? <QuestionPage /> : <Navigate to="/" />} />
         <Route path="/quiz" element={isLoggedIn ? <QuizPage /> : <Navigate to="/" />} />
