@@ -22,6 +22,9 @@ function AppWrapper() {
 
   const setUser = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("email", userData.email); // ✅ أضف هذا
+    localStorage.setItem("Level", userData.level); 
+    localStorage.setItem("name", userData.name || "");
     setUserState(userData);
   };
 
