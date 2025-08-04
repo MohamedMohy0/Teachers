@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  HashRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import Home from "./Home";
 import Dashboard from "./Dashboard";
 import QuestionPage from "./QuestionPage";
@@ -8,8 +14,9 @@ import CompleteProfile from "./CompleteProfile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function App() {
+function AppWrapper() {
   const [user, setUserState] = useState(null);
+  const navigate = useNavigate();
 
   const setUser = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
@@ -23,21 +30,20 @@ function App() {
     }
   }, []);
 
-  // التوجيه التلقائي عند تسجيل الدخول حسب حالة الاسم
   useEffect(() => {
     if (user) {
       if (!user.name || user.name.trim() === "") {
-        window.location.hash = "#/complete-profile";
+        navigate("/complete-profile");
       } else {
-        window.location.hash = "#/dashboard";
+        navigate("/dashboard");
       }
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const isAuthenticated = !!user;
 
   return (
-    <HashRouter>
+    <>
       <ToastContainer position="top-center" />
       <Routes>
         <Route
@@ -50,7 +56,6 @@ function App() {
             )
           }
         />
-
         <Route
           path="/dashboard"
           element={
@@ -61,7 +66,6 @@ function App() {
             )
           }
         />
-
         <Route
           path="/app"
           element={
@@ -72,7 +76,6 @@ function App() {
             )
           }
         />
-
         <Route
           path="/quiz"
           element={
@@ -83,7 +86,6 @@ function App() {
             )
           }
         />
-
         <Route
           path="/complete-profile"
           element={
@@ -95,8 +97,15 @@ function App() {
           }
         />
       </Routes>
-    </HashRouter>
+    </>
   );
 }
 
-export default App;
+// ✅ هذه هي الطريقة الصحيحة للف ملف AppWrapper داخل HashRouter
+export default function App() {
+  return (
+    <HashRouter>
+      <AppWrapper />
+    </HashRouter>
+  );
+}
