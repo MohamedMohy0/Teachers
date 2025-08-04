@@ -17,14 +17,13 @@ function Home() {
     setLoading(true);
 
     try {
-      const response = await axios.post("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login", {
+      const response = await axios.post("http://localhost:8000/login", {
         email,
         password,
       });
 
       const { name, level } = response.data;
-      localStorage.setItem("email", email);
-      localStorage.setItem("Level", level);
+
       if (!name || name.trim() === "") {
         navigate("/complete-profile", {
           state: {
@@ -52,7 +51,6 @@ function Home() {
     }
   };
 
-  
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fa] p-6 text-gray-800 font-sans">
       <ToastContainer />

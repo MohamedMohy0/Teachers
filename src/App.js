@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./Home";
 import Dashboard from "./Dashboard";
@@ -6,29 +7,29 @@ import QuizPage from "./QuizPage";
 import CompleteProfile from "./CompleteProfile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect, useState } from "react";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [email, setEmail] = useState(null);
 
   useEffect(() => {
-    const email = localStorage.getItem("email");
-    setIsLoggedIn(!!email);
+    const storedEmail = localStorage.getItem("email");
+    if (storedEmail) {
+      setEmail(storedEmail);
+    }
   }, []);
-
-  if (isLoggedIn === null) {
-    return null; // أو Spinner لو أردت
-  }
 
   return (
     <HashRouter>
       <ToastContainer position="top-center" />
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Home />} />
-        <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/" />} />
-        <Route path="/app" element={isLoggedIn ? <QuestionPage /> : <Navigate to="/" />} />
-        <Route path="/quiz" element={isLoggedIn ? <QuizPage /> : <Navigate to="/" />} />
-        <Route path="/complete-profile" element={isLoggedIn ? <CompleteProfile /> : <Navigate to="/" />} />
+        {/* إذا لم يسجل دخول، يبقى في صفحة Home */}
+        <Route path="/" element={email ? <Navigate to="/dashboard" /> : <Home setEmail={setEmail} />} />
+        
+        {/* المسارات الأخرى محمية: إذا لم يسجل دخول، يعود إلى صفحة الدخول */}
+        <Route path="/dashboard" element={email ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/app" element={email ? <QuestionPage /> : <Navigate to="/" />} />
+        <Route path="/quiz" element={email ? <QuizPage /> : <Navigate to="/" />} />
+        <Route path="/complete-profile" element={email ? <CompleteProfile /> : <Navigate to="/" />} />
       </Routes>
     </HashRouter>
   );
