@@ -5,9 +5,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Eye, EyeOff } from "lucide-react";
 
-function Home(setUser) {
+function Home({ setUser }) {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // يُستخدم للتحقق لاحقًا إن أردت
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,27 +23,17 @@ function Home(setUser) {
       });
 
       const { name, level } = response.data;
-      setUser({ email, name, level });
+
+      setUser({ email, name, level }); // هذا هو المهم
+
       if (!name || name.trim() === "") {
-        setEmail(email);
-        navigate("/complete-profile", {
-          state: {
-            email,
-            level,
-          },
-        });
+        navigate("/complete-profile");
       } else {
-        setEmail(email);
-        navigate("/dashboard", {
-          state: {
-            email,
-            level,
-          },
-        });
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error(error);
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         toast.error("البريد الإلكتروني غير موجود");
       } else {
         toast.error("حدث خطأ أثناء تسجيل الدخول");
@@ -58,10 +48,7 @@ function Home(setUser) {
       <ToastContainer />
       <div className="max-w-md mx-auto mt-24">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-          <h1 className="text-3xl font-bold mb-6 text-center text-[#1e293b]">
-            تسجيل الدخول
-          </h1>
-
+          <h1 className="text-3xl font-bold mb-6 text-center text-[#1e293b]">تسجيل الدخول</h1>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block mb-1 font-medium">البريد الإلكتروني:</label>

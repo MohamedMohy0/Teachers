@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./Home";
 import Dashboard from "./Dashboard";
@@ -10,16 +10,23 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   // الحالة المركزية للمستخدم
-  const [user, setUser] = useState(null); // { email, level, name }
+  const [user, setUser] = useState(null);
 
-  // تحقق من تسجيل الدخول (إذا كانت هناك بيانات مستخدم)
+  // عند تحميل التطبيق، تحقق من وجود مستخدم محفوظ في localStorage
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  // التحقق مما إذا كان المستخدم مسجل دخول
   const isAuthenticated = !!user;
 
   return (
     <HashRouter>
       <ToastContainer position="top-center" />
       <Routes>
-        {/* صفحة الدخول - إذا سجل المستخدم الدخول، ينتقل إلى لوحة التحكم */}
         <Route
           path="/"
           element={
@@ -31,7 +38,6 @@ function App() {
           }
         />
 
-        {/* لوحة التحكم */}
         <Route
           path="/dashboard"
           element={
@@ -43,7 +49,6 @@ function App() {
           }
         />
 
-        {/* صفحة الأسئلة */}
         <Route
           path="/app"
           element={
@@ -55,7 +60,6 @@ function App() {
           }
         />
 
-        {/* صفحة الاختبار */}
         <Route
           path="/quiz"
           element={
@@ -67,7 +71,6 @@ function App() {
           }
         />
 
-        {/* صفحة إكمال الملف الشخصي */}
         <Route
           path="/complete-profile"
           element={
