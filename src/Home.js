@@ -23,7 +23,8 @@ function Home() {
       });
 
       const { name, level } = response.data;
-
+      localStorage.setItem("email", email);
+      localStorage.setItem("Level", level);
       if (!name || name.trim() === "") {
         navigate("/complete-profile", {
           state: {
