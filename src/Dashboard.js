@@ -1,21 +1,39 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const email = localStorage.getItem("email");
-    if (!email) {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
       navigate("/");
+    } else {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (!parsed.email) {
+          navigate("/");
+        } else {
+          setUser(parsed);
+        }
+      } catch {
+        navigate("/");
+      }
     }
   }, [navigate]);
+
+  if (!user) {
+    return null; // أو يمكن عرض "جاري التحميل..."
+  }
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fa] p-6 text-gray-800 font-sans">
       <div className="max-w-md mx-auto mt-24">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
-          <h1 className="text-3xl font-bold mb-6 text-[#1e293b]">مرحباً بك </h1>
+          <h1 className="text-3xl font-bold mb-6 text-[#1e293b]">
+            مرحباً بك، {user.name || "مستخدم"}
+          </h1>
 
           <div className="space-y-4">
             <button
