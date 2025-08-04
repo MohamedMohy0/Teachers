@@ -51,6 +51,7 @@ function Home() {
     }
   };
 
+  
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fa] p-6 text-gray-800 font-sans">
       <ToastContainer />
