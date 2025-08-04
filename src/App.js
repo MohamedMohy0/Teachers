@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useState } from "react";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(null); // null تعني لم نتحقق بعد
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const email = localStorage.getItem("email");
