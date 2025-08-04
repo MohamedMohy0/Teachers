@@ -7,7 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 function Home() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(""); // يُستخدم للتحقق لاحقًا إن أردت
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,15 +15,37 @@ function Home() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const res = await axios.post("http://localhost:8000/login", {
+      const response = await axios.post("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login", {
         email,
         password,
       });
-      toast.success(res.data.message || "تم تسجيل الدخول بنجاح");
-      setTimeout(() => navigate("/app"), 1500);
-    } catch (err) {
-      toast.error(err.response?.data?.detail || "حدث خطأ أثناء محاولة تسجيل الدخول");
+
+      const { name, level } = response.data;
+
+      if (!name || name.trim() === "") {
+        navigate("/complete-profile", {
+          state: {
+            email,
+            level,
+          },
+        });
+      } else {
+        navigate("/dashboard", {
+          state: {
+            email,
+            level,
+          },
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 401) {
+        toast.error("البريد الإلكتروني غير موجود");
+      } else {
+        toast.error("حدث خطأ أثناء تسجيل الدخول");
+      }
     } finally {
       setLoading(false);
     }
