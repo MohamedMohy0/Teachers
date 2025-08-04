@@ -23,8 +23,15 @@ function Dashboard() {
     }
   }, [navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
   if (!user) {
-    return null; // أو يمكن عرض "جاري التحميل..."
+    return (
+      <div className="text-center mt-20 text-lg font-bold">جاري التحميل...</div>
+    );
   }
 
   return (
@@ -32,7 +39,7 @@ function Dashboard() {
       <div className="max-w-md mx-auto mt-24">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
           <h1 className="text-3xl font-bold mb-6 text-[#1e293b]">
-            مرحباً بك، {user.name || "مستخدم"}
+            مرحباً بك، {user.name && user.name.trim() !== "" ? user.name : "مستخدم"}
           </h1>
 
           <div className="space-y-4">
@@ -48,6 +55,13 @@ function Dashboard() {
               className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow transition duration-300"
             >
               بدء اختبار
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="w-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-8 py-3 rounded-full font-bold shadow transition duration-300 mt-4"
+            >
+              تسجيل الخروج
             </button>
           </div>
         </div>

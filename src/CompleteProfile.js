@@ -4,37 +4,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function CompleteProfile() {
+function CompleteProfile({ user, setUser }) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const email = location.state?.email || "";
+  const email = user?.email || "";
 
-  const [level, setLevel] = useState(location.state?.level || "");
+  const [level, setLevel] = useState(user?.level || "");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [center, setCenter] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const centers = [
-    "سنتر الأوائل",
-    "سنتر النجاح",
-    "سنتر التفوق",
-    "سنتر الأمل",
-    "سنتر الزهراء"
-  ];
+  const centers = [ "سنتر الأوائل", "سنتر النجاح", "سنتر التفوق", "سنتر الأمل", "سنتر الزهراء" ];
 
   useEffect(() => {
-    if (!level && email) {
-      axios
-        .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_user_info?email=${email}`)
-        .then((res) => {
-          setLevel(res.data.level || "");
-        })
-        .catch((err) => {
-          console.error("فشل في تحميل بيانات الطالب:", err);
-        });
+    if (!email || !level) {
+      toast.error("يجب تسجيل الدخول أولاً");
+      navigate("/");
     }
-  }, [email, level]);
+  }, [email, level, navigate]);
 
   const handleSubmit = async () => {
     if (!name || !phone || !center) {
@@ -53,7 +40,8 @@ function CompleteProfile() {
       });
 
       toast.success("تم الحفظ بنجاح");
-      navigate("/dashboard", { state: { email, level } });
+      setUser({ ...user, name });
+      navigate("/dashboard");
     } catch (err) {
       console.error(err);
       toast.error("حدث خطأ أثناء حفظ البيانات");
@@ -61,6 +49,7 @@ function CompleteProfile() {
       setLoading(false);
     }
   };
+
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fa] p-6 text-gray-800 font-sans">

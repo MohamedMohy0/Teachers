@@ -6,11 +6,13 @@ import {
   Navigate,
   useNavigate,
 } from "react-router-dom";
+
 import Home from "./Home";
 import Dashboard from "./Dashboard";
 import QuestionPage from "./QuestionPage";
 import QuizPage from "./QuizPage";
 import CompleteProfile from "./CompleteProfile";
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -66,16 +68,17 @@ function AppWrapper() {
             )
           }
         />
-        <Route
-          path="/app"
-          element={
-            isAuthenticated ? (
-              <QuestionPage user={user} />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-        />
+<Route
+  path="/app"
+  element={
+    isAuthenticated ? (
+      <QuestionPage user={user} />
+    ) : (
+      <Navigate to="/" />
+    )
+  }
+/>
+
         <Route
           path="/quiz"
           element={
@@ -86,22 +89,25 @@ function AppWrapper() {
             )
           }
         />
-        <Route
-          path="/complete-profile"
-          element={
-            isAuthenticated ? (
-              <CompleteProfile user={user} setUser={setUser} />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-        />
+       <Route
+  path="/complete-profile"
+  element={
+    isAuthenticated ? (
+      <CompleteProfile user={user} setUser={setUser} />
+    ) : (
+      <Navigate to="/" />
+    )
+  }
+/>
+
+        {/* التعامل مع المسارات الخاطئة */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>
   );
 }
 
-// ✅ هذه هي الطريقة الصحيحة للف ملف AppWrapper داخل HashRouter
+// ✅ ملف App الأساسي مع HashRouter للـ GitHub Pages
 export default function App() {
   return (
     <HashRouter>

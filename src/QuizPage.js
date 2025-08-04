@@ -5,9 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-function QuizPage() {
-  const [email, setEmail] = useState("");
-  const [userName, setUserName] = useState("بدون اسم");
+function QuizPage({ user }) {
+  const [email, setEmail] = useState(user?.email || "");
+  const [userName, setUserName] = useState(user?.name || "بدون اسم");
   const [quizNumber, setQuizNumber] = useState(null);
   const [pageCount, setPageCount] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -21,61 +21,28 @@ function QuizPage() {
   const [quizFinished, setQuizFinished] = useState(false);
   const reportRef = useRef(null);
 
-  const downloadReport = async () => {
-    const element = reportRef.current;
-
-    if (!element) return;
-
-    const canvas = await html2canvas(element, {
-      scale: 2,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "px",
-      format: [canvas.width, canvas.height],
-    });
-
-    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-    pdf.save(`تقرير_${userName}.pdf`);
-  };
-
   useEffect(() => {
-    const storedEmail = localStorage.getItem("email");
-    if (!storedEmail) {
-      toast.error("يرجى تسجيل الدخول أولاً");
-      return;
-    }
-    setEmail(storedEmail);
+    if (!email) return;
 
     axios
-      .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_quiz_info?email=${storedEmail}`)
+      .get(`https://.../get_quiz_info?email=${email}`)
       .then((res) => {
         setQuizNumber(res.data.quiz_number);
         setPageCount(res.data.page_count);
         setAnswers(res.data.answers);
         setLoading(false);
-        loadQuestionImage(0, storedEmail);
+        loadQuestionImage(0, email);
       })
       .catch((err) => {
-        if (err.response?.status === 403) {
-          toast.error(err.response.data.detail);
-        } else {
-          toast.error("حدث خطأ أثناء تحميل بيانات الكويز");
-        }
+        toast.error("حدث خطأ أثناء تحميل بيانات الكويز");
       });
 
     axios
-      .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_user?email=${storedEmail}`)
+      .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_user?email=${email}`)
       .then((res) => {
         setUserName(res.data.Name || "بدون اسم");
-        localStorage.setItem("name", res.data.Name || "بدون اسم");
-      })
-      .catch((err) => {
-        console.error("فشل تحميل الاسم:", err);
       });
-  }, []);
+  }, [email]);
 
   const loadQuestionImage = async (pageIndex, email) => {
     try {

@@ -15,25 +15,33 @@ function Home({ setUser }) {
     setLoading(true);
 
     try {
-      const response = await axios.post("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login",
+        { email, password }
+      );
 
-      const { name, level } = response.data;
+      const { name, level, needs_info } = response.data;
 
       if (!email || !level) {
         toast.error("حدث خطأ في استجابة السيرفر");
         return;
       }
 
-      const userData = { email, name: name || "", level };
-      setUser(userData); // سيتم التوجيه في App.js بعد تحديث user
+      const userData = {
+        email,
+        name: name || "",
+        level,
+        needs_info: !!needs_info,
+      };
+
+      setUser(userData); // التوجيه يتم في App.js تلقائيًا
 
     } catch (error) {
       console.error(error);
       if (error.response?.status === 401) {
-        toast.error("البريد الإلكتروني غير موجود");
+        toast.error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      } else if (error.response?.status === 403) {
+        toast.error(error.response.data.detail || "تم حظر الحساب");
       } else {
         toast.error("حدث خطأ أثناء تسجيل الدخول");
       }
