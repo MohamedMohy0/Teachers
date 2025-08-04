@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
+import "react-toastify/dist/ReactToastify.css";
 
 function Home({ setUser }) {
   const [email, setEmail] = useState("");
@@ -23,8 +23,7 @@ function Home({ setUser }) {
       });
 
       const { name, level } = response.data;
-
-      setUser({ email, name, level }); // هذا هو المهم
+      setUser({ email, name, level });
 
       if (!name || name.trim() === "") {
         navigate("/complete-profile");
@@ -32,7 +31,6 @@ function Home({ setUser }) {
         navigate("/dashboard");
       }
     } catch (error) {
-      console.error(error);
       if (error.response?.status === 401) {
         toast.error("البريد الإلكتروني غير موجود");
       } else {
@@ -61,7 +59,6 @@ function Home({ setUser }) {
                 required
               />
             </div>
-
             <div>
               <label className="block mb-1 font-medium">كلمة المرور:</label>
               <div className="relative">
@@ -82,7 +79,6 @@ function Home({ setUser }) {
                 </button>
               </div>
             </div>
-
             <div className="text-center">
               <button
                 type="submit"

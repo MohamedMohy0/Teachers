@@ -10,13 +10,19 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   // الحالة المركزية للمستخدم
-  const [user, setUser] = useState(null);
+  const [user, setUserState] = useState(null);
+
+  // وظيفة لتحديث حالة المستخدم وتخزينها في localStorage
+  const setUser = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUserState(userData);
+  };
 
   // عند تحميل التطبيق، تحقق من وجود مستخدم محفوظ في localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      setUserState(JSON.parse(savedUser));
     }
   }, []);
 
