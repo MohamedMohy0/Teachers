@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Eye, EyeOff } from "lucide-react";
 
-function Home() {
+function Home(setUser) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // يُستخدم للتحقق لاحقًا إن أردت
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +23,7 @@ function Home() {
       });
 
       const { name, level } = response.data;
-
+      setUser({ email, name, level });
       if (!name || name.trim() === "") {
         setEmail(email);
         navigate("/complete-profile", {
