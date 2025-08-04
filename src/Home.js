@@ -17,7 +17,7 @@ function Home() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:8000/login", {
+      const response = await axios.post("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login", {
         email,
         password,
       });
@@ -25,6 +25,7 @@ function Home() {
       const { name, level } = response.data;
 
       if (!name || name.trim() === "") {
+        setEmail(email);
         navigate("/complete-profile", {
           state: {
             email,
@@ -32,6 +33,7 @@ function Home() {
           },
         });
       } else {
+        setEmail(email);
         navigate("/dashboard", {
           state: {
             email,
