@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,7 +9,6 @@ function Home({ setUser }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,14 +21,17 @@ function Home({ setUser }) {
       });
 
       const { name, level } = response.data;
-      setUser({ email, name, level });
 
-      if (!name || name.trim() === "") {
-        navigate("/complete-profile");
-      } else {
-        navigate("/dashboard");
+      if (!email || !level) {
+        toast.error("حدث خطأ في استجابة السيرفر");
+        return;
       }
+
+      const userData = { email, name: name || "", level };
+      setUser(userData); // سيتم التوجيه في App.js بعد تحديث user
+
     } catch (error) {
+      console.error(error);
       if (error.response?.status === 401) {
         toast.error("البريد الإلكتروني غير موجود");
       } else {

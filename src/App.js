@@ -9,16 +9,13 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  // الحالة المركزية للمستخدم
   const [user, setUserState] = useState(null);
 
-  // وظيفة لتحديث حالة المستخدم وتخزينها في localStorage
   const setUser = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUserState(userData);
   };
 
-  // عند تحميل التطبيق، تحقق من وجود مستخدم محفوظ في localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -26,7 +23,17 @@ function App() {
     }
   }, []);
 
-  // التحقق مما إذا كان المستخدم مسجل دخول
+  // التوجيه التلقائي عند تسجيل الدخول حسب حالة الاسم
+  useEffect(() => {
+    if (user) {
+      if (!user.name || user.name.trim() === "") {
+        window.location.hash = "#/complete-profile";
+      } else {
+        window.location.hash = "#/dashboard";
+      }
+    }
+  }, [user]);
+
   const isAuthenticated = !!user;
 
   return (
