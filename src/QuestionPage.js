@@ -4,7 +4,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function QuestionPage({ user }) {
+function QuestionPage() {
   const [grade, setGrade] = useState("");
   const [lecture, setLecture] = useState("");
   const [question, setQuestion] = useState("");
@@ -15,14 +15,16 @@ function QuestionPage({ user }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user?.email || !user?.level) {
+    const savedEmail = localStorage.getItem("email");
+    const savedLevel = localStorage.getItem("Level");
+    if (savedEmail && savedLevel) {
+      setEmail(savedEmail);
+      setGrade(savedLevel);
+    } else {
       toast.error("يجب تسجيل الدخول أولاً");
       setTimeout(() => navigate("/"), 2000);
-    } else {
-      setEmail(user.email);
-      setGrade(user.level);
     }
-  }, [user, navigate]);
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

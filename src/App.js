@@ -1,120 +1,24 @@
-import { useEffect, useState } from "react";
-import {
-  HashRouter,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
-
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import Dashboard from "./Dashboard";
 import QuestionPage from "./QuestionPage";
 import QuizPage from "./QuizPage";
-import CompleteProfile from "./CompleteProfile";
-
+import CompleteProfile from "./CompleteProfile"; // ⬅️ استيراد الصفحة الجديدة
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-function AppWrapper() {
-  const [user, setUserState] = useState(null);
-  const navigate = useNavigate();
-
-  const setUser = (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("email", userData.email); // ✅ أضف هذا
-    localStorage.setItem("Level", userData.level); 
-    localStorage.setItem("name", userData.name || "");
-    setUserState(userData);
-  };
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUserState(JSON.parse(savedUser));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      if (!user.name || user.name.trim() === "") {
-        navigate("/complete-profile");
-      } else {
-        navigate("/dashboard");
-      }
-    }
-  }, [user, navigate]);
-
-  const isAuthenticated = !!user;
-
-  return (
-    <>
-      <ToastContainer position="top-center" />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" />
-            ) : (
-              <Home setUser={setUser} />
-            )
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? (
-              <Dashboard user={user} />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-        />
-<Route
-  path="/app"
-  element={
-    isAuthenticated ? (
-      <QuestionPage user={user} />
-    ) : (
-      <Navigate to="/" />
-    )
-  }
-/>
-
-        <Route
-          path="/quiz"
-          element={
-            isAuthenticated ? (
-              <QuizPage user={user} />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
-        />
-       <Route
-  path="/complete-profile"
-  element={
-    isAuthenticated ? (
-      <CompleteProfile user={user} setUser={setUser} />
-    ) : (
-      <Navigate to="/" />
-    )
-  }
-/>
-
-        {/* التعامل مع المسارات الخاطئة */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </>
-  );
-}
-
-// ✅ ملف App الأساسي مع HashRouter للـ GitHub Pages
-export default function App() {
+function App() {
   return (
     <HashRouter>
-      <AppWrapper />
+      <ToastContainer position="top-center" />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/app" element={<QuestionPage />} />
+        <Route path="/quiz" element={<QuizPage />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} /> {/* ⬅️ أضف هذا السطر */}
+      </Routes>
     </HashRouter>
   );
 }
+
+export default App;

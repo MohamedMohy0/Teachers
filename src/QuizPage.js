@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
-function QuizPage({ user }) {
-  const [email, setEmail] = useState(user?.email || "");
-  const [userName, setUserName] = useState(user?.name || "بدون اسم");
+
+function QuizPage() {
+  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("بدون اسم");
   const [quizNumber, setQuizNumber] = useState(null);
   const [pageCount, setPageCount] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -19,30 +18,44 @@ function QuizPage({ user }) {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [quizFinished, setQuizFinished] = useState(false);
-  const reportRef = useRef(null);
+
+
 
   useEffect(() => {
-    if (!email) return;
+    const storedEmail = localStorage.getItem("email");
+    if (!storedEmail) {
+      toast.error("يرجى تسجيل الدخول أولاً");
+      return;
+    }
+    setEmail(storedEmail);
 
     axios
-      .get(`https://.../get_quiz_info?email=${email}`)
+      .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_quiz_info?email=${storedEmail}`)
       .then((res) => {
         setQuizNumber(res.data.quiz_number);
         setPageCount(res.data.page_count);
         setAnswers(res.data.answers);
         setLoading(false);
-        loadQuestionImage(0, email);
+        loadQuestionImage(0, storedEmail);
       })
       .catch((err) => {
-        toast.error("حدث خطأ أثناء تحميل بيانات الكويز");
+        if (err.response?.status === 403) {
+          toast.error(err.response.data.detail);
+        } else {
+          toast.error("حدث خطأ أثناء تحميل بيانات الكويز");
+        }
       });
 
     axios
-      .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_user?email=${email}`)
+      .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_user?email=${storedEmail}`)
       .then((res) => {
         setUserName(res.data.Name || "بدون اسم");
+        localStorage.setItem("name", res.data.Name || "بدون اسم");
+      })
+      .catch((err) => {
+        console.error("فشل تحميل الاسم:", err);
       });
-  }, [email]);
+  }, []);
 
   const loadQuestionImage = async (pageIndex, email) => {
     try {

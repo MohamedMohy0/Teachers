@@ -1,46 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
+    const email = localStorage.getItem("email");
+    if (!email) {
       navigate("/");
-    } else {
-      try {
-        const parsed = JSON.parse(storedUser);
-        if (!parsed.email) {
-          navigate("/");
-        } else {
-          setUser(parsed);
-        }
-      } catch {
-        navigate("/");
-      }
     }
   }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
-  };
-
-  if (!user) {
-    return (
-      <div className="text-center mt-20 text-lg font-bold">جاري التحميل...</div>
-    );
-  }
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fa] p-6 text-gray-800 font-sans">
       <div className="max-w-md mx-auto mt-24">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
-          <h1 className="text-3xl font-bold mb-6 text-[#1e293b]">
-            مرحباً بك، {user.name && user.name.trim() !== "" ? user.name : "مستخدم"}
-          </h1>
+          <h1 className="text-3xl font-bold mb-6 text-[#1e293b]">مرحباً بك </h1>
 
           <div className="space-y-4">
             <button
@@ -55,13 +30,6 @@ function Dashboard() {
               className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow transition duration-300"
             >
               بدء اختبار
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="w-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-8 py-3 rounded-full font-bold shadow transition duration-300 mt-4"
-            >
-              تسجيل الخروج
             </button>
           </div>
         </div>

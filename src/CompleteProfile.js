@@ -4,24 +4,37 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function CompleteProfile({ user, setUser }) {
+function CompleteProfile() {
   const navigate = useNavigate();
-  const email = user?.email || "";
+  const location = useLocation();
+  const email = location.state?.email || "";
 
-  const [level, setLevel] = useState(user?.level || "");
+  const [level, setLevel] = useState(location.state?.level || "");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [center, setCenter] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const centers = [ "سنتر الأوائل", "سنتر النجاح", "سنتر التفوق", "سنتر الأمل", "سنتر الزهراء" ];
+  const centers = [
+    "سنتر الأوائل",
+    "سنتر النجاح",
+    "سنتر التفوق",
+    "سنتر الأمل",
+    "سنتر الزهراء"
+  ];
 
   useEffect(() => {
-    if (!email || !level) {
-      toast.error("يجب تسجيل الدخول أولاً");
-      navigate("/");
+    if (!level && email) {
+      axios
+        .get(`https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/get_user_info?email=${email}`)
+        .then((res) => {
+          setLevel(res.data.level || "");
+        })
+        .catch((err) => {
+          console.error("فشل في تحميل بيانات الطالب:", err);
+        });
     }
-  }, [email, level, navigate]);
+  }, [email, level]);
 
   const handleSubmit = async () => {
     if (!name || !phone || !center) {
@@ -40,8 +53,7 @@ function CompleteProfile({ user, setUser }) {
       });
 
       toast.success("تم الحفظ بنجاح");
-      setUser({ ...user, name });
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { email, level } });
     } catch (err) {
       console.error(err);
       toast.error("حدث خطأ أثناء حفظ البيانات");
@@ -49,7 +61,6 @@ function CompleteProfile({ user, setUser }) {
       setLoading(false);
     }
   };
-
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f5f7fa] p-6 text-gray-800 font-sans">

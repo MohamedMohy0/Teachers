@@ -1,47 +1,49 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import { Eye, EyeOff } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Eye, EyeOff } from "lucide-react";
 
-function Home({ setUser }) {
+function Home() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(""); // يُستخدم للتحقق لاحقًا إن أردت
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login",
-        { email, password }
-      );
-
-      const { name, level, needs_info } = response.data;
-
-      if (!email || !level) {
-        toast.error("حدث خطأ في استجابة السيرفر");
-        return;
-      }
-
-      const userData = {
+      const response = await axios.post("https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev/login", {
         email,
-        name: name || "",
-        level,
-        needs_info: !!needs_info,
-      };
+        password,
+      });
 
-      setUser(userData); // التوجيه يتم في App.js تلقائيًا
-
+      const { name, level } = response.data;
+      localStorage.setItem("email", email);
+      localStorage.setItem("Level", level);
+      if (!name || name.trim() === "") {
+        navigate("/complete-profile", {
+          state: {
+            email,
+            level,
+          },
+        });
+      } else {
+        navigate("/dashboard", {
+          state: {
+            email,
+            level,
+          },
+        });
+      }
     } catch (error) {
       console.error(error);
-      if (error.response?.status === 401) {
-        toast.error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-      } else if (error.response?.status === 403) {
-        toast.error(error.response.data.detail || "تم حظر الحساب");
+      if (error.response && error.response.status === 401) {
+        toast.error("البريد الإلكتروني غير موجود");
       } else {
         toast.error("حدث خطأ أثناء تسجيل الدخول");
       }
@@ -55,7 +57,10 @@ function Home({ setUser }) {
       <ToastContainer />
       <div className="max-w-md mx-auto mt-24">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-          <h1 className="text-3xl font-bold mb-6 text-center text-[#1e293b]">تسجيل الدخول</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center text-[#1e293b]">
+            تسجيل الدخول
+          </h1>
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block mb-1 font-medium">البريد الإلكتروني:</label>
@@ -68,6 +73,7 @@ function Home({ setUser }) {
                 required
               />
             </div>
+
             <div>
               <label className="block mb-1 font-medium">كلمة المرور:</label>
               <div className="relative">
@@ -88,6 +94,7 @@ function Home({ setUser }) {
                 </button>
               </div>
             </div>
+
             <div className="text-center">
               <button
                 type="submit"
