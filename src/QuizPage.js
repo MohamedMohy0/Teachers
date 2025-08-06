@@ -13,7 +13,7 @@ function QuizPage() {
   const [imageUrl, setImageUrl] = useState(null);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
-  const [attempts, setAttempts] = useState({});
+  const [, setAttempts] = useState({});
   const [locked, setLocked] = useState({});
   const [questionStatus, setQuestionStatus] = useState({});
   const [score, setScore] = useState(0);
@@ -62,11 +62,11 @@ function QuizPage() {
       toast.warn("يرجى إدخال رقم صحيح");
       return;
     }
-      if (inputQuizNumber<0) {
+    if (inputQuizNumber < 0) {
       toast.warn("يرجى إدخال رقم صحيح");
       return;
     }
-    
+
     resetQuizState();
     setLoading(true);
 
@@ -83,8 +83,10 @@ function QuizPage() {
       setUserName(res.data.name);
 
       if (res.data.already_done) {
-        const percentage = Math.round((res.data.score / pages) * 100);
-        setScore(res.data.score);
+        // تأكد أن النتيجة عدد وليس نص أو null
+        const scoreFromServer = Number(res.data.score) || 0;
+        const percentage = Math.round((scoreFromServer / pages) * 100);
+        setScore(scoreFromServer);
         setDate(res.data.date);
         setQuizFinished(true);
         setGrade(getGradeFromPercentage(percentage));
@@ -92,6 +94,7 @@ function QuizPage() {
         setAnswers(res.data.answers || {}); // تأكد أن answers كائن
         setQuizStarted(true);
         loadQuestionImage(0, email, inputQuizNumber);
+        await loadAttempts(email, Number(inputQuizNumber)); // تحميل حالة المحاولات المخزنة
       }
     } catch (error) {
       toast.error("غير مسموح بحل هذا الواجب بعد");
@@ -112,46 +115,68 @@ function QuizPage() {
     }
   };
 
-  // دالة لتوحيد شكل الحروف وتقليم الفراغات
+  // تحميل محاولات المستخدم السابقة من السيرفر وتحديث score بناءً عليها
+  const loadAttempts = async (email, quizNum) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/get_attempts`, {
+        params: { email, quiz_number: quizNum }
+      });
+      const attemptsData = res.data;
+
+      const newLocked = {};
+      const newQuestionStatus = {};
+      for (const [qIndex, val] of Object.entries(attemptsData)) {
+        newLocked[qIndex] = val.locked;
+        newQuestionStatus[qIndex] = val.status;
+      }
+      setLocked(newLocked);
+      setQuestionStatus(newQuestionStatus);
+
+      // تحديث الدرجة بعد تحميل حالة المحاولات
+      const correctCount = Object.values(newQuestionStatus).filter(status => status === "correct").length;
+      setScore(correctCount);
+
+    } catch (err) {
+      toast.error("فشل في تحميل حالة المحاولات السابقة");
+    }
+  };
+
   const normalizeLetter = (letter) => {
     if (!letter) return "";
-    // استبدال ألف بدون همزة بألف بهمزة (مثلاً)
     let normalized = letter.trim();
     normalized = normalized.replace(/ا/g, "أ");
-    // ممكن تضيف تعويضات أخرى إذا تريد
     return normalized;
   };
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = async (option) => {
     if (locked[currentQuestion]) return;
-
-    const correctAnswerRaw = answers[currentQuestion];
-    const correctAnswer = normalizeLetter(String(correctAnswerRaw));
-    const selected = normalizeLetter(String(option));
-    const currentAttempts = attempts[currentQuestion] || 0;
 
     setSelectedOption(option);
 
-    // طباعة القيم للمراجعة أثناء التطوير
-    console.log("Selected option:", selected);
-    console.log("Correct answer:", correctAnswer);
-    console.log("Match result:", selected === correctAnswer);
+    try {
+      const res = await axios.post(`${BASE_URL}/submit_attempt`, {
+        email,
+        quiz_number: Number(quizNumber),
+        question_index: currentQuestion,
+        selected_option: option,
+      });
 
-    if (selected === correctAnswer) {
-      toast.success("إجابة صحيحة");
-      setScore((prev) => prev + 1);
-      setLocked((prev) => ({ ...prev, [currentQuestion]: true }));
-      setQuestionStatus((prev) => ({ ...prev, [currentQuestion]: "correct" }));
-    } else {
-      if (currentAttempts === 0) {
+      const { status, locked: isLocked, attempts: attemptCount } = res.data;
+
+      setLocked((prev) => ({ ...prev, [currentQuestion]: isLocked }));
+      setAttempts((prev) => ({ ...prev, [currentQuestion]: attemptCount }));
+      setQuestionStatus((prev) => ({ ...prev, [currentQuestion]: status }));
+
+      if (status === "correct") {
+        toast.success("إجابة صحيحة");
+        setScore((prev) => prev + 1);
+      } else if (status === "wrong-once") {
         toast.warn("حاول مرة أخرى");
-        setAttempts((prev) => ({ ...prev, [currentQuestion]: 1 }));
-        setQuestionStatus((prev) => ({ ...prev, [currentQuestion]: "wrong-once" }));
-      } else {
+      } else if (status === "wrong") {
         toast.error("الإجابة خاطئة");
-        setLocked((prev) => ({ ...prev, [currentQuestion]: true }));
-        setQuestionStatus((prev) => ({ ...prev, [currentQuestion]: "wrong" }));
       }
+    } catch (err) {
+      toast.error("حدث خطأ أثناء التحقق من الإجابة");
     }
   };
 
@@ -193,7 +218,7 @@ function QuizPage() {
   };
 
   const getGradeFromPercentage = (percentage) => {
-    if (percentage >= 90) return "+أ"
+    if (percentage >= 90) return "+أ";
     if (percentage >= 85) return "أ";
     if (percentage >= 80) return "+ب";
     if (percentage >= 75) return "ب";
@@ -236,7 +261,8 @@ function QuizPage() {
           />
           <button
             onClick={startQuiz}
-className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"          >
+            className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"
+          >
             ابدأ الواجب
           </button>
         </div>
@@ -346,7 +372,8 @@ className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-6
           <button
             onClick={handleNext}
             disabled={!allAnswered && currentQuestion + 1 === pageCount}
-className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"          >
+            className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"
+          >
             {currentQuestion + 1 < pageCount ? "التالي" : "إنهاء"}
           </button>
         </div>
