@@ -22,14 +22,14 @@ function Dashboard() {
               onClick={() => navigate("/app")}
               className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow transition duration-300"
             >
-              عرض الأسئلة
+              عرض الاجابات
             </button>
 
             <button
               onClick={() => navigate("/quiz")}
               className="w-full border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow transition duration-300"
             >
-              بدء اختبار
+              بدء الواجب
             </button>
           </div>
         </div>
