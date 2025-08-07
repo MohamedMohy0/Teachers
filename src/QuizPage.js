@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { Player } from "@lottiefiles/react-lottie-player";
+import { motion } from "framer-motion";
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import loadingAnim from "./Loading.json";
 
 function QuizPage() {
   const [email, setEmail] = useState("");
@@ -22,18 +28,30 @@ function QuizPage() {
   const [date, setDate] = useState("");
   const [grade, setGrade] = useState("");
   const [quizStarted, setQuizStarted] = useState(false);
+  const [, setDarkMode] = useState(false);
 
-  const BASE_URL = "https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev";
+  const options = ["ا", "ب", "ج", "د"];
+  const navigate = useNavigate();
 
-  const options = ["ا", "ب", "ج", "د"]; // خيارات الحروف
-
+  // Load user email & dark mode, redirect if not logged in
   useEffect(() => {
     const storedEmail = localStorage.getItem("email");
+    const storedDarkMode = localStorage.getItem("darkMode") === "true";
+
     if (!storedEmail) {
       toast.error("يرجى تسجيل الدخول أولاً");
+      setTimeout(() => navigate("/"), 2000);
       return;
     }
     setEmail(storedEmail);
+    setDarkMode(storedDarkMode);
+  }, [navigate]);
+
+  const BASE_URL = "https://4339162f-ea5a-42f1-82eb-95a2625b145c-00-3pggxbtxrk63z.spock.replit.dev";
+
+  // Particles init
+  const particlesInit = useCallback(async (engine) => {
+    await loadFull(engine);
   }, []);
 
   const resetQuizState = () => {
@@ -58,15 +76,10 @@ function QuizPage() {
   };
 
   const startQuiz = async () => {
-    if (!inputQuizNumber) {
+    if (!inputQuizNumber || inputQuizNumber < 0) {
       toast.warn("يرجى إدخال رقم صحيح");
       return;
     }
-    if (inputQuizNumber < 0) {
-      toast.warn("يرجى إدخال رقم صحيح");
-      return;
-    }
-
     resetQuizState();
     setLoading(true);
 
@@ -83,7 +96,6 @@ function QuizPage() {
       setUserName(res.data.name);
 
       if (res.data.already_done) {
-        // تأكد أن النتيجة عدد وليس نص أو null
         const scoreFromServer = Number(res.data.score) || 0;
         const percentage = Math.round((scoreFromServer / pages) * 100);
         setScore(scoreFromServer);
@@ -91,10 +103,10 @@ function QuizPage() {
         setQuizFinished(true);
         setGrade(getGradeFromPercentage(percentage));
       } else {
-        setAnswers(res.data.answers || {}); // تأكد أن answers كائن
+        setAnswers(res.data.answers || {});
         setQuizStarted(true);
+        await loadAttempts(email, Number(inputQuizNumber));
         loadQuestionImage(0, email, inputQuizNumber);
-        await loadAttempts(email, Number(inputQuizNumber)); // تحميل حالة المحاولات المخزنة
       }
     } catch (error) {
       toast.error("غير مسموح بحل هذا الواجب بعد");
@@ -110,12 +122,11 @@ function QuizPage() {
         { responseType: "blob" }
       );
       setImageUrl(URL.createObjectURL(res.data));
-    } catch (err) {
+    } catch {
       toast.error("حدث خطأ أثناء تحميل صورة السؤال");
     }
   };
 
-  // تحميل محاولات المستخدم السابقة من السيرفر وتحديث score بناءً عليها
   const loadAttempts = async (email, quizNum) => {
     try {
       const res = await axios.get(`${BASE_URL}/get_attempts`, {
@@ -132,11 +143,10 @@ function QuizPage() {
       setLocked(newLocked);
       setQuestionStatus(newQuestionStatus);
 
-      // تحديث الدرجة بعد تحميل حالة المحاولات
       const correctCount = Object.values(newQuestionStatus).filter(status => status === "correct").length;
       setScore(correctCount);
 
-    } catch (err) {
+    } catch {
       toast.error("فشل في تحميل حالة المحاولات السابقة");
     }
   };
@@ -175,7 +185,7 @@ function QuizPage() {
       } else if (status === "wrong") {
         toast.error("الإجابة خاطئة");
       }
-    } catch (err) {
+    } catch {
       toast.error("حدث خطأ أثناء التحقق من الإجابة");
     }
   };
@@ -239,76 +249,152 @@ function QuizPage() {
       (status) => status === "correct" || status === "wrong"
     );
 
-  if (loading) return <div className="p-10 text-center">جاري التحميل...</div>;
+  // Show main loading animation while loading quiz data or question images
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900 z-50">
+        <Player autoplay loop src={loadingAnim} style={{ height: 150, width: 150 }} />
+      </div>
+    );
+  }
 
+  // Before quiz started
   if (!quizStarted && !quizFinished) {
     return (
       <div
         dir="rtl"
-        className="min-h-screen flex items-center justify-center bg-gray-100 p-6"
+        className="min-h-screen flex items-center justify-center bg-[#f5f7fa] dark:bg-gray-900 p-6 relative overflow-hidden font-sans transition-colors duration-300"
       >
+        <Particles
+          id="tsparticles"
+          init={particlesInit}
+          options={{
+            fullScreen: { enable: true, zIndex: -1 },
+            particles: {
+              number: { value: 40 },
+              color: { value: "#3b82f6" },
+              shape: { type: "circle" },
+              opacity: { value: 0.3 },
+              size: { value: { min: 1, max: 5 } },
+              move: { enable: true, speed: 1 },
+            },
+          }}
+        />
         <ToastContainer />
-        <div className="bg-white p-8 rounded-2xl shadow-xl text-center w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6">
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 max-w-md w-full text-center"
+        >
+          <h2 className="text-3xl font-bold mb-6 text-center text-blue-700 dark:text-blue-400">
             اختر رقم الواجب الذي ترغب بحله
           </h2>
           <input
             type="number"
             value={inputQuizNumber}
             onChange={(e) => setInputQuizNumber(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl mb-4"
+            className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl mb-6 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="أدخل رقم الواجب"
           />
           <button
             onClick={startQuiz}
-            className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-4 rounded-full font-bold text-xl shadow-md transition duration-300"
           >
             ابدأ الواجب
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
+  // After quiz finished
   if (quizFinished) {
     const percentage = Math.round((score / pageCount) * 100);
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-        <div className="bg-white p-8 rounded-2xl shadow-xl text-center w-full max-w-md">
-          <h2 className="text-3xl font-extrabold text-green-700 mb-6">
+      <div
+        dir="rtl"
+        className="min-h-screen flex items-center justify-center bg-[#f5f7fa] dark:bg-gray-900 p-6 relative overflow-hidden font-sans transition-colors duration-300"
+      >
+        <Particles
+          id="tsparticles"
+          init={particlesInit}
+          options={{
+            fullScreen: { enable: true, zIndex: -1 },
+            particles: {
+              number: { value: 40 },
+              color: { value: "#3b82f6" },
+              shape: { type: "circle" },
+              opacity: { value: 0.3 },
+              size: { value: { min: 1, max: 5 } },
+              move: { enable: true, speed: 1 },
+            },
+          }}
+        />
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 max-w-md w-full text-center"
+        >
+          <ToastContainer />
+          <h2 className="text-3xl font-bold mb-6 text-center text-blue-700 dark:text-blue-400">
             تم الانتهاء من الواجب رقم {quizNumber}
           </h2>
-          <p className="text-right text-lg font-bold">الاسم: {userName}</p>
-          <p className="text-right text-lg font-bold">تاريخ الإكمال: {date}</p>
-          <p className="text-right text-lg font-bold">
-            الدرجة: {score} من {pageCount}
-          </p>
-          <p className="text-right text-lg font-bold">%النسبة: {percentage}</p>
-          <p className="text-right text-lg font-bold">التقدير: {grade}</p>
-        </div>
+        <p className="text-right text-lg font-bold text-black dark:text-white">الاسم: {userName}</p>
+        <p className="text-right text-lg font-bold text-black dark:text-white">تاريخ الإكمال: {date}</p>
+        <p className="text-right text-lg font-bold text-black dark:text-white">الدرجة: {score} من {pageCount}</p>
+        <p className="text-right text-lg font-bold text-black dark:text-white">النسبة: {percentage}%</p>
+        <p className="text-right text-lg font-bold text-black dark:text-white">التقدير: {grade}</p>
+
+        </motion.div>
       </div>
     );
   }
 
+  // Quiz in progress UI
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-gray-100 p-6 text-gray-800 font-sans"
+      className="min-h-screen bg-[#f5f7fa] dark:bg-gray-900 text-gray-800 dark:text-gray-100 relative overflow-hidden font-sans transition-colors duration-300"
     >
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={{
+          fullScreen: { enable: true, zIndex: -1 },
+          particles: {
+            number: { value: 40 },
+            color: { value: "#3b82f6" },
+            shape: { type: "circle" },
+            opacity: { value: 0.3 },
+            size: { value: { min: 1, max: 5 } },
+            move: { enable: true, speed: 1 },
+          },
+        }}
+      />
       <ToastContainer />
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-4">
+      <motion.div
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 100 }}
+        className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 mt-24 relative"
+      >
+        <h1 className="text-3xl font-bold mb-6 text-center text-blue-700 dark:text-blue-400">
           واجب رقم {quizNumber}
         </h1>
-        <p className="text-center mb-4">
+        <p className="text-center text-lg font-bold text-black dark:text-white">
           السؤال {currentQuestion + 1} من {pageCount}
         </p>
+        <p className="text-center text-lg font-bold text-black dark:text-white">
+             
+             </p>
 
-        {/* شريط حالة الأسئلة */}
-        <div className="flex justify-center gap-2 mb-4">
+        {/* Question status bar */}
+        <div className="flex justify-center gap-2 mb-6 flex-wrap">
           {Array.from({ length: pageCount }).map((_, i) => {
             const status = getQuestionStatus(i);
-            let bgColor = "bg-gray-300"; // لم يتم الاجابة
+            let bgColor = "bg-gray-300";
 
             if (status === "correct") bgColor = "bg-green-500";
             else if (status === "wrong-once") bgColor = "bg-yellow-400";
@@ -322,7 +408,7 @@ function QuizPage() {
                   setSelectedOption(null);
                   loadQuestionImage(i, email, quizNumber);
                 }}
-                className={`${bgColor} w-6 h-6 rounded cursor-pointer flex items-center justify-center text-white text-sm font-bold select-none`}
+                className={`${bgColor} w-8 h-8 rounded cursor-pointer flex items-center justify-center text-white text-sm font-bold select-none`}
                 title={`السؤال ${i + 1}`}
               >
                 {i + 1}
@@ -332,52 +418,55 @@ function QuizPage() {
         </div>
 
         {imageUrl && (
-          <div className="mb-6">
+          <div className="mb-8 flex justify-center">
             <img
               src={imageUrl}
               alt={`Question ${currentQuestion + 1}`}
-              className="mx-auto max-w-full border rounded shadow"
+              className="max-w-full rounded-xl shadow-lg border border-gray-300 dark:border-gray-700"
             />
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 text-center">
+        <div className="grid grid-cols-2 gap-6 text-center">
           {options.map((opt) => (
             <button
               key={opt}
               onClick={() => handleOptionClick(opt)}
               disabled={locked[currentQuestion]}
-              className={`p-3 rounded-xl font-bold border-2 transition-all duration-200 ${
-                selectedOption === opt
-                  ? normalizeLetter(opt) === normalizeLetter(String(answers[currentQuestion]))
-                    ? "bg-green-100 border-green-500 text-green-700"
-                    : "bg-red-100 border-red-500 text-red-700"
-                  : "bg-white border-gray-300 hover:bg-blue-100"
-              }`}
+              className={`p-4 rounded-xl font-bold border-2 transition-all duration-200
+                ${
+                  selectedOption === opt
+                    ? normalizeLetter(opt) === normalizeLetter(String(answers[currentQuestion]))
+                      ? "bg-green-100 border-green-500 text-green-700"
+                      : "bg-red-100 border-red-500 text-red-700"
+                    : "bg-white border-gray-300 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-blue-700 dark:text-gray-200"
+                }
+              `}
             >
               {opt}
             </button>
           ))}
         </div>
 
-        <div className="flex justify-between mt-8">
-          <button
-            onClick={handlePrev}
-            disabled={currentQuestion === 0}
-            className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"
-          >
-            السابق
-          </button>
+ <div className="flex justify-between mt-10 space-x-4 rtl:space-x-reverse">
+  <button
+    onClick={handlePrev}
+    disabled={currentQuestion === 0}
+    className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-6 py-3 rounded-full font-bold text-lg shadow-md transition duration-300"
+  >
+    السابق
+  </button>
 
-          <button
-            onClick={handleNext}
-            disabled={!allAnswered && currentQuestion + 1 === pageCount}
-            className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-full font-bold shadow"
-          >
-            {currentQuestion + 1 < pageCount ? "التالي" : "إنهاء"}
-          </button>
-        </div>
-      </div>
+  <button
+    onClick={handleNext}
+    disabled={!allAnswered && currentQuestion + 1 === pageCount}
+    className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-6 py-3 rounded-full font-bold text-lg shadow-md transition duration-300"
+  >
+    {currentQuestion + 1 < pageCount ? "التالي" : "إنهاء"}
+  </button>
+</div>
+
+      </motion.div>
     </div>
   );
 }
