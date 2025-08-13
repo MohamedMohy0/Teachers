@@ -24,7 +24,7 @@ function TestPage() {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [testFinished, setTestFinished] = useState(false);
-  const [date, setDate] = useState("");
+  const [, setDate] = useState("");
   const [grade, setGrade] = useState("");
   const [testStarted, setTestStarted] = useState(false);
   const [testCompleted, setTestCompleted] = useState(false);
@@ -415,16 +415,12 @@ const startTest = async () => {
                 <p className="font-bold">{userName}</p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-                <p className="text-gray-600 dark:text-gray-300">التاريخ</p>
-                <p className="font-bold">{date}</p>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-300">الدرجة</p>
                 <p className="font-bold">{score} / {pageCount}</p>
               </div>
                 <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-300">النسبة</p>
-                <p className="font-bold">{percentage} </p>
+                <p className="font-bold">{percentage}% </p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-300">التقدير</p>
