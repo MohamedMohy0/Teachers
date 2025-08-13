@@ -3,9 +3,11 @@ import Home from "./Home";
 import Dashboard from "./Dashboard";
 import QuestionPage from "./QuestionPage";
 import QuizPage from "./QuizPage";
-import CompleteProfile from "./CompleteProfile"; // ⬅️ استيراد الصفحة الجديدة
+import TestPage from "./TestPage"; // ⬅️ استيراد الصفحة الجديدة
+import CompleteProfile from "./CompleteProfile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   return (
     <HashRouter>
@@ -15,7 +17,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/app" element={<QuestionPage />} />
         <Route path="/quiz" element={<QuizPage />} />
-        <Route path="/complete-profile" element={<CompleteProfile />} /> {/* ⬅️ أضف هذا السطر */}
+        <Route path="/test" element={<TestPage />} /> {/* ⬅️ صفحة الـ Test */}
+        <Route path="/complete-profile" element={<CompleteProfile />} />
       </Routes>
     </HashRouter>
   );

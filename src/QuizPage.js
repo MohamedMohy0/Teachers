@@ -346,7 +346,12 @@ function QuizPage() {
         <p className="text-right text-lg font-bold text-black dark:text-white">الدرجة: {score} من {pageCount}</p>
         <p className="text-right text-lg font-bold text-black dark:text-white">النسبة: {percentage}%</p>
         <p className="text-right text-lg font-bold text-black dark:text-white">التقدير: {grade}</p>
-
+          <button 
+            onClick={() => navigate("/dashboard")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold"
+          >
+            العودة للرئيسية
+          </button>
         </motion.div>
       </div>
     );

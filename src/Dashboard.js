@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
 import loadingAnim from "./Loading.json";       // Loading screen animation
 import welcomeAnim from "./Welcome.json";       // New top animation (place your file here)
+
 function Dashboard() {
   const navigate = useNavigate();
   const [initialLoading, setInitialLoading] = useState(true);
   const [buttonLoading, setButtonLoading] = useState(false);
+
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (!email) {
@@ -71,6 +73,14 @@ function Dashboard() {
               className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-3 rounded-full font-bold text-lg shadow-md transition duration-300 flex items-center justify-center"
             >
               بدء الواجب
+            </button>
+
+            {/* 🔽 زر الاختبار الجديد */}
+            <button
+              onClick={() => handleNavigate("/test")}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-3 rounded-full font-bold text-lg shadow-md transition duration-300 flex items-center justify-center"
+            >
+              بدء الاختبار
             </button>
           </div>
         </div>
