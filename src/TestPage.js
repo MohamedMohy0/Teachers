@@ -266,7 +266,8 @@ function TestPage() {
     return "راسب";
   };
 
-  
+
+
 const startTest = async () => {
     if (!inputTestNumber || Number(inputTestNumber) < 0) {
         toast.warn("يرجى إدخال رقم صحيح");
@@ -420,6 +421,10 @@ const startTest = async () => {
               <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-300">الدرجة</p>
                 <p className="font-bold">{score} / {pageCount}</p>
+              </div>
+                <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-300">النسبة</p>
+                <p className="font-bold">{percentage} </p>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-300">التقدير</p>
